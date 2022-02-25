@@ -22,29 +22,29 @@
         return array;
 
     }
-
-    var acc_x = getArrayWithLimitedLength(20);
-    var acc_y = getArrayWithLimitedLength(20);
-    var acc_z = getArrayWithLimitedLength(20);
+    
+    var buffer_length=20;
+    var data_keys=['gyro', 'acc', 'mag'];
+    var data={};
+    for (var key in data_keys){
+        for (var val in ['x', 'y', 'z']) {
+            data[key][val] = getArrayWithLimitedLength(buffer_length);
+        }
+      }
 
     function onLine(line) {
         try {
             var j = JSON.parse(line);
             console.log(j)
             elements.bat.setValue(j.bat);
-
-            acc_x.push(j.acc.x);
-            acc_y.push(j.acc.y);
-            acc_z.push(j.acc.z);
-            console.log(acc_x);
-
-            elements.acc_x.setData(acc_x);
-            elements.acc_y.setData(acc_y);
-            elements.acc_z.setData(acc_z);
-
-            elements.acc_x_val.setValue(j.acc.x);
-            elements.acc_y_val.setValue(j.acc.y);
-            elements.acc_z_val.setValue(j.acc.z);
+            for (var key in data_keys) {
+                for (var val in ['x', 'y', 'z']) {
+                    data[key][val].push(j[key][val]);
+                    var name = key + "_" + val;
+                    elements[name + "_val"].setData(j[key][val]);
+                    elements[name + "_graph"].setData(data[key][val]);
+                }
+            }
         } catch (e) {
             console.log("Received: ", line);
         }
@@ -80,7 +80,7 @@
                     // Now tell it to write data on the current light level to Bluetooth
                     // 10 times a second. Also ensure that when disconnected, Puck.js
                     // resets so the setInterval doesn't keep draining battery.
-                    connection.write("setInterval(function(){var data=Puck.accel();Bluetooth.println(JSON.stringify({acc:data.acc,bat:Puck.getBatteryPercentage()}));},100);NRF.on('disconnect',function(){reset();});\n",
+                    connection.write("setInterval(function(){var data=Puck.accel();Bluetooth.println(JSON.stringify({mag:Puck.mag(),acc:data.acc,gyro:data.gyro,bat:Puck.getBatteryPercentage()}));},100);NRF.on('disconnect',function(){reset();});\n",
                         function () {
                             console.log("Ready...");
                         });
@@ -93,17 +93,25 @@
     // Set up the controls we see on the screen
     var elements = {
         heading: TD.label({x: 10, y: 10, width: 190, height: 50, label: "My Dashboard"}),
-        bat : TD.gauge({x:10,y:70,width:190,height:220,label:"Battery Level",value:0,min:0,max:100}),
-        acc_x_val:TD.value({x:10, y:300, width:190, height:60,label:"X",value:"0"}),
-        acc_y_val:TD.value({x:10, y:370, width:190, height:60,label:"Y",value:"0"}),
-        acc_z_val:TD.value({x:10, y:440, width:190, height:60,label:"Z",value:"0"}),
-        acc_x: TD.graph({x: 210, y: 10, width: 400, height: 180, label: "acc X"}),
-        acc_y: TD.graph({x: 210, y: 200, width: 400, height: 180, label: "acc Y"}),
-        acc_z: TD.graph({x: 210, y: 390, width: 400, height: 180, label: "acc Z"}),
+        bat: TD.gauge({x:10,y:70,width:190,height:220,label:"Battery Level",value:0,min:0,max:100}),
         modal: TD.modal({x: 10, y: 10, width: 190, height: 430, label: "Click to connect", onchange: connectDevice})
     }
+    var min_x=210;
+    var min_y=10;
+    var value_width=190;
+    var chart_height=180;
+    for (var key in data_keys){
+        for (var val in ['x', 'y', 'z']) {
+            var name = key + "_" + val;
+            elements[name + "_val"] = TD.value({x:min_x, y:min_y, width:value_width, height:chart_height,label:"X",value:"0"});
+            elements[name + "_graph"] = TD.graph({x:min_x + value_width + 10, y: min_y + chart_height + 10, width: 400, height: chart_height, label: "acc X"});
+            min_y = min_y + 2 * (chart_height + 10)
+        }
+      }
     for (var i in elements)
         document.body.appendChild(elements[i]);
+    
+    
 </script>
 </body>
 </html>
