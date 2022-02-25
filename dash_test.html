@@ -23,15 +23,15 @@
 
     }
 
-    var acc_x = getArrayWithLimitedLength(50);
-    var acc_y = getArrayWithLimitedLength(50);
-    var acc_z = getArrayWithLimitedLength(50);
+    var acc_x = getArrayWithLimitedLength(20);
+    var acc_y = getArrayWithLimitedLength(20);
+    var acc_z = getArrayWithLimitedLength(20);
 
     function onLine(line) {
         try {
             var j = JSON.parse(line);
-            elements.light.setValue(j.light * 100);
-
+            elements.bat.setValue(j.bat);
+            
             acc_x.push(j.acc.x);
             acc_y.push(j.acc.y);
             acc_z.push(j.acc.z);
@@ -79,7 +79,7 @@
                     // Now tell it to write data on the current light level to Bluetooth
                     // 10 times a second. Also ensure that when disconnected, Puck.js
                     // resets so the setInterval doesn't keep draining battery.
-                    connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({acc:Puck.accel()}));},100);NRF.on('disconnect',function(){Puck.accOn();reset();});\n",
+                    connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({acc:Puck.accel(), bat:Puck.getBatteryPercentage()}));},100);NRF.on('disconnect',function(){Puck.accOn();reset();});\n",
                         function () {
                             console.log("Ready...");
                         });
@@ -92,10 +92,10 @@
     // Set up the controls we see on the screen
     var elements = {
         heading: TD.label({x: 10, y: 10, width: 190, height: 50, label: "My Dashboard"}),
-        light: TD.gauge({x: 10, y: 70, width: 190, height: 220, label: "Light", value: 0, min: 0, max: 100}),
-        acc_x_val:TD.value({x:10, y:90, width:190, height:60,label:"X",value:"0"}),
-        acc_y_val:TD.value({x:10, y:160, width:190, height:60,label:"Y",value:"0"}),
-        acc_z_val:TD.value({x:10, y:230, width:190, height:60,label:"Z",value:"0"}),
+        bat : TD.gauge({x:10,y:30,width:190,height:220,label:"Battery Level",value:0,min:0,max:100}),
+        acc_x_val:TD.value({x:10, y:260, width:190, height:60,label:"X",value:"0"}),
+        acc_y_val:TD.value({x:10, y:330, width:190, height:60,label:"Y",value:"0"}),
+        acc_z_val:TD.value({x:10, y:400, width:190, height:60,label:"Z",value:"0"}),
         acc_x: TD.graph({x: 210, y: 10, width: 400, height: 180, label: "acc X"}),
         acc_y: TD.graph({x: 210, y: 200, width: 400, height: 180, label: "acc Y"}),
         acc_z: TD.graph({x: 210, y: 390, width: 400, height: 180, label: "acc Z"}),
