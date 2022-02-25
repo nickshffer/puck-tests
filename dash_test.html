@@ -9,14 +9,20 @@
   <script src="https://www.puck-js.com/puck.js"></script>  
   <script>
   // Called when we get a line of data - updates the light color
+  var mag_x = [];
+  var mag_y = [];
+  var mag_z = [];
   function onLine(line) {
     try {
       var j = JSON.parse(line);
       console.log("Received JSON: ",j);
       elements.light.setValue(j.light*100);
-      elements.mag_x.setValue(j.mag.x);
-      elements.mag_y.setValue(j.mag.y);
-      elements.mag_z.setValue(j.mag.z);
+      mag_x.push(j.mag.x);
+      mag_y.push(j.mag.y);
+      mag_z.push(j.mag.z);
+      elements.mag_x.setData(mag_x);
+      elements.mag_y.setData(mag_y);
+      elements.mag_z.setData(mag_z);
     } catch(e) {
       console.log("Received: ",line);
     }
