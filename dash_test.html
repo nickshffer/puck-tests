@@ -23,27 +23,27 @@
 
     }
 
-    var mag_x = getArrayWithLimitedLength(50);
-    var mag_y = getArrayWithLimitedLength(50);
-    var mag_z = getArrayWithLimitedLength(50);
+    var acc_x = getArrayWithLimitedLength(50);
+    var acc_y = getArrayWithLimitedLength(50);
+    var acc_z = getArrayWithLimitedLength(50);
 
     function onLine(line) {
         try {
             var j = JSON.parse(line);
             elements.light.setValue(j.light * 100);
 
-            mag_x.push(j.mag.x);
-            mag_y.push(j.mag.y);
-            mag_z.push(j.mag.z);
-            console.log(mag_x);
+            acc_x.push(j.acc.x);
+            acc_y.push(j.acc.y);
+            acc_z.push(j.acc.z);
+            console.log(acc_x);
 
-            elements.mag_x.setData(mag_x);
-            elements.mag_y.setData(mag_y);
-            elements.mag_z.setData(mag_z);
+            elements.acc_x.setData(acc_x);
+            elements.acc_y.setData(acc_y);
+            elements.acc_z.setData(acc_z);
 
-            elements.mag_x_val.setValue(j.mag.x);
-            elements.mag_y_val.setValue(j.mag.y);
-            elements.mag_z_val.setValue(j.mag.z);
+            elements.acc_x_val.setValue(j.acc.x);
+            elements.acc_y_val.setValue(j.acc.y);
+            elements.acc_z_val.setValue(j.acc.z);
         } catch (e) {
             console.log("Received: ", line);
         }
@@ -79,7 +79,7 @@
                     // Now tell it to write data on the current light level to Bluetooth
                     // 10 times a second. Also ensure that when disconnected, Puck.js
                     // resets so the setInterval doesn't keep draining battery.
-                    connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({light:Puck.light(),mag:Puck.mag()}));},100);NRF.on('disconnect',function(){Puck.magOn();reset();});\n",
+                    connection.write("setInterval(function(){Bluetooth.println(JSON.stringify({acc:Puck.accel()}));},100);NRF.on('disconnect',function(){Puck.accOn();reset();});\n",
                         function () {
                             console.log("Ready...");
                         });
@@ -93,12 +93,12 @@
     var elements = {
         heading: TD.label({x: 10, y: 10, width: 190, height: 50, label: "My Dashboard"}),
         light: TD.gauge({x: 10, y: 70, width: 190, height: 220, label: "Light", value: 0, min: 0, max: 100}),
-        mag_x_val:TD.value({x:10, y:90, width:190, height:60,label:"X",value:"0"}),
-        mag_y_val:TD.value({x:10, y:160, width:190, height:60,label:"Y",value:"0"}),
-        mag_z_val:TD.value({x:10, y:230, width:190, height:60,label:"Z",value:"0"}),
-        mag_x: TD.graph({x: 210, y: 10, width: 400, height: 180, label: "Mag X"}),
-        mag_y: TD.graph({x: 210, y: 200, width: 400, height: 180, label: "Mag Y"}),
-        mag_z: TD.graph({x: 210, y: 390, width: 400, height: 180, label: "Mag Z"}),
+        acc_x_val:TD.value({x:10, y:90, width:190, height:60,label:"X",value:"0"}),
+        acc_y_val:TD.value({x:10, y:160, width:190, height:60,label:"Y",value:"0"}),
+        acc_z_val:TD.value({x:10, y:230, width:190, height:60,label:"Z",value:"0"}),
+        acc_x: TD.graph({x: 210, y: 10, width: 400, height: 180, label: "acc X"}),
+        acc_y: TD.graph({x: 210, y: 200, width: 400, height: 180, label: "acc Y"}),
+        acc_z: TD.graph({x: 210, y: 390, width: 400, height: 180, label: "acc Z"}),
         modal: TD.modal({x: 10, y: 10, width: 190, height: 430, label: "Click to connect", onchange: connectDevice})
     }
     for (var i in elements)
