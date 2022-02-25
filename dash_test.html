@@ -30,20 +30,20 @@
     function onLine(line) {
         try {
             var j = JSON.parse(line);
-            console.log("Received JSON: ", j);
             elements.light.setValue(j.light * 100);
 
             mag_x.push(j.mag.x);
             mag_y.push(j.mag.y);
             mag_z.push(j.mag.z);
+            console.log(mag_x);
 
             elements.mag_x.setData(mag_x);
             elements.mag_y.setData(mag_y);
             elements.mag_z.setData(mag_z);
 
-            elements.mag_x_val.setValue(mag_x);
-            elements.mag_y_val.setValue(mag_y);
-            elements.mag_z_val.setValue(mag_z);
+            elements.mag_x_val.setValue(j.mag.x);
+            elements.mag_y_val.setValue(j.mag.y);
+            elements.mag_z_val.setValue(j.mag.z);
         } catch (e) {
             console.log("Received: ", line);
         }
