@@ -9,37 +9,41 @@
 <script src="https://www.puck-js.com/puck.js"></script>
 <script>
     // Called when we get a line of data - updates the light color
-    var createRingBuffer = function (length) {
-        /* https://stackoverflow.com/a/4774081 */
-        var pointer = 0, buffer = [];
+    function getArrayWithLimitedLength(length) {
+        var array = new Array();
 
-        return {
-            data: function () {
-                return buffer
-            },
-            push: function (item) {
-                buffer[pointer] = item;
-                pointer = (pointer + 1) % length;
-                return item;
+        array.push = function () {
+            if (this.length >= length) {
+                this.shift();
             }
-        };
-    };
+            return Array.prototype.push.apply(this, arguments);
+        }
 
-    var mag_x = createRingBuffer(50);
-    var mag_y = createRingBuffer(50);
-    var mag_z = createRingBuffer(50);
+        return array;
+
+    }
+
+    var mag_x = getArrayWithLimitedLength(50);
+    var mag_y = getArrayWithLimitedLength(50);
+    var mag_z = getArrayWithLimitedLength(50);
 
     function onLine(line) {
         try {
             var j = JSON.parse(line);
             console.log("Received JSON: ", j);
             elements.light.setValue(j.light * 100);
+
             mag_x.push(j.mag.x);
             mag_y.push(j.mag.y);
             mag_z.push(j.mag.z);
-            elements.mag_x.setData(mag_x.data);
-            elements.mag_y.setData(mag_y.data);
-            elements.mag_z.setData(mag_z.data);
+
+            elements.mag_x.setData(mag_x);
+            elements.mag_y.setData(mag_y);
+            elements.mag_z.setData(mag_z);
+
+            elements.mag_x_val.setValue(mag_x);
+            elements.mag_y_val.setValue(mag_y);
+            elements.mag_z_val.setValue(mag_z);
         } catch (e) {
             console.log("Received: ", line);
         }
@@ -89,6 +93,9 @@
     var elements = {
         heading: TD.label({x: 10, y: 10, width: 190, height: 50, label: "My Dashboard"}),
         light: TD.gauge({x: 10, y: 70, width: 190, height: 220, label: "Light", value: 0, min: 0, max: 100}),
+        mag_x_val:TD.value({x:10, y:90, width:190, height:60,label:"X",value:"0"}),
+        mag_y_val:TD.value({x:10, y:160, width:190, height:60,label:"Y",value:"0"}),
+        mag_z_val:TD.value({x:10, y:230, width:190, height:60,label:"Z",value:"0"}),
         mag_x: TD.graph({x: 210, y: 10, width: 400, height: 180, label: "Mag X"}),
         mag_y: TD.graph({x: 210, y: 200, width: 400, height: 180, label: "Mag Y"}),
         mag_z: TD.graph({x: 210, y: 390, width: 400, height: 180, label: "Mag Z"}),
