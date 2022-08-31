@@ -102,7 +102,7 @@ function disconnect() {
 function doIt() {
     disconnect();
 
-    navigator.bluetooth.requestDevice({ optionalServices: ['f8b23a4d-89ad-4220-8c9f-d81756009f0c', 0x2A19], acceptAllDevices: true })
+    navigator.bluetooth.requestDevice({ optionalServices: [0xBCDE], acceptAllDevices: true })
         .then(d => {
             device = d;
             console.debug('device:', device)
@@ -112,31 +112,8 @@ function doIt() {
             server = s
             console.debug('server:', server)
 
-            // get battery service & characteristic:
-            s.getPrimaryService(0x2A19)
-                .then(battSrv => {
-                    console.debug('got battService:', battSrv)
-                    battService = battSrv
-                    return battSrv.getCharacteristic(0x2A19)
-                })
-                .then(battCh => {
-                    console.debug('got battCharacteristic:', battCh)
-                    battCharacteristic = battCh
-                    // add event listener to battery characteristic
-                    battCh.addEventListener('characteristicvaluechanged', battChanged)
-                    battCh.startNotifications()
-
-                    // get the current battery level
-                    battCh.readValue()
-                        .then(w => {
-                            var battLevel = new Uint8Array(w.buffer)[0];
-                            showBattLevel(battLevel)
-                        })
-                })
-
-
             // get magnetometer service & characteristic:
-            s.getPrimaryService('f8b23a4d-89ad-4220-8c9f-d81756009f0c')
+            s.getPrimaryService(0xBCDE)
                 .then(srv => {
                     service = srv
                     console.debug('service:', service)
@@ -146,18 +123,12 @@ function doIt() {
                     console.log('characteristics:', chs)
                     for (let ix = 0; ix < chs.length; ix++) {
                         const ch = chs[ix];
-                        if (ch.uuid == 'f8b23a4d-89ad-4220-8c9f-d81756009f0c') {
+                        if (ch.uuid == 0xABCD) {
                             // Puck or Bangle magnetometer
                             magnetoCharacteristic = ch
                             ch.addEventListener('characteristicvaluechanged', gotMagnetoData)
                             ch.startNotifications()
                             setSampleRate(sampleRateSelect.value)
-                        }
-                        if (ch.uuid == 'f8b23a4d-89ad-4220-8c9f-d81756009f0d') {
-                            // Bangle's accelerometer
-                            accelCharacteristic = ch
-                            ch.addEventListener('characteristicvaluechanged', gotAcceleroData)
-                            ch.startNotifications()
                         }
                     }
                 })
